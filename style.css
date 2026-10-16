@@ -92,3 +92,47 @@ kbd {
 }
 
 .help { color: var(--muted); font-size: 0.85rem; text-align: center; }
+
+.options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--muted);
+}
+
+select {
+  font: inherit;
+  color: var(--text);
+  background: #1b2d22;
+  border: 1px solid #2f4b39;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-left: 6px;
+}
+
+.new-best { color: #ffd76a; font-weight: 600; }
+
+/* On-screen direction pad, shown on touch screens */
+.dpad {
+  display: none;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(3, 52px);
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+.dpad button { font-size: 1.2rem; padding: 0; touch-action: manipulation; }
+.dpad [data-dir="up"] { grid-area: 1 / 2; }
+.dpad [data-dir="left"] { grid-area: 2 / 1; }
+.dpad [data-dir="right"] { grid-area: 2 / 3; }
+.dpad [data-dir="down"] { grid-area: 3 / 2; }
+
+.touch { display: none; }
+
+@media (pointer: coarse) {
+  .dpad { display: grid; }
+  .touch { display: block; }
+  .keys { display: none; }
+}

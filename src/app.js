@@ -11,6 +11,23 @@ let game = createGame({ width: SIZE, height: SIZE });
 let state = 'ready';                    // ready | playing | paused | over
 let timer = null;
 
+// ---- settings and best scores (kept in this browser; storage can be blocked, so never fail on it) ----
+
+const storage = {
+  get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
+  set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ } },
+};
+const level = () => $('speed').value;
+const bestScores = () => storage.get('snake-best', {});      // one best score per speed level
+const showBest = () => { $('best').textContent = bestScores()[level()] ?? 0; };
+
+$('speed').value = storage.get('snake-speed', 'normal');
+$('speed').onchange = () => {
+  storage.set('snake-speed', level());
+  showBest();
+  $('speed').blur();                    // so arrow keys steer instead of changing the speed
+};
+
 // ---- drawing ----
 
 function fitCanvas() {
@@ -58,7 +75,7 @@ function tick() {
   $('score').textContent = game.score;
   draw();
   if (result === 'crash' || result === 'win') return end(result);
-  timer = setTimeout(tick, tickMs('normal', game.score));
+  timer = setTimeout(tick, tickMs(level(), game.score));
 }
 
 function start() {
@@ -68,20 +85,31 @@ function start() {
   }
   state = 'playing';
   $('overlay').hidden = true;
+  $('speed').disabled = true;           // changing speed mid-game would make best scores unfair
+  $('pause').setAttribute('aria-pressed', 'false');
+  $('pause').textContent = 'Pause';
   clearTimeout(timer);
-  timer = setTimeout(tick, tickMs('normal', game.score));
+  timer = setTimeout(tick, tickMs(level(), game.score));
 }
 
 function pause() {
   if (state !== 'playing') return;
   state = 'paused';
   clearTimeout(timer);
+  $('pause').setAttribute('aria-pressed', 'true');
+  $('pause').textContent = 'Resume';
   showOverlay('Paused', 'Resume');
 }
 
 function end(result) {
   state = 'over';
+  $('speed').disabled = false;
+  $('pause').textContent = 'Pause';
+  const best = bestScores();
+  const isBest = game.score > (best[level()] ?? 0);
+  if (isBest) { best[level()] = game.score; storage.set('snake-best', best); showBest(); }
   showOverlay(result === 'win' ? `You filled the board! Score ${game.score}` : `Game over · Score ${game.score}`, 'Play again');
+  if (isBest) $('message').insertAdjacentHTML('beforeend', '<br><span class="new-best">New best score!</span>');
 }
 
 function showOverlay(message, button) {
@@ -110,6 +138,35 @@ addEventListener('keydown', (e) => {
   }
 });
 
+// ---- touch: swipe on the board, or the on-screen buttons ----
+
+let touchStart = null;
+canvas.addEventListener('pointerdown', (e) => { touchStart = { x: e.clientX, y: e.clientY }; });
+canvas.addEventListener('pointermove', (e) => {
+  if (!touchStart) return;
+  const dx = e.clientX - touchStart.x;
+  const dy = e.clientY - touchStart.y;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;     // ignore small wobbles
+  steer(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+  touchStart = { x: e.clientX, y: e.clientY };                 // allow a second swipe without lifting
+});
+addEventListener('pointerup', () => { touchStart = null; });
+
+document.querySelectorAll('.dpad button').forEach((b) => {
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); steer(b.dataset.dir); });
+});
+
+/** Steering from touch also starts the game, so phone players don't need the Start button. */
+function steer(dir) {
+  if (state === 'ready' || state === 'over') start();
+  else if (state === 'paused') return;
+  turn(game, dir);
+}
+
 $('start').onclick = start;
+$('pause').onclick = () => (state === 'playing' ? pause() : state === 'paused' && start());
+// Pause automatically when the player switches tabs or locks the phone
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 addEventListener('resize', fitCanvas);
+showBest();
 fitCanvas();

@@ -12,8 +12,20 @@
       <h1>Snake</h1>
       <div class="scores">
         <span>Score <strong id="score">0</strong></span>
+        <span>Best <strong id="best">0</strong></span>
       </div>
     </header>
+
+    <div class="options">
+      <label>Speed
+        <select id="speed">
+          <option value="slow">Slow</option>
+          <option value="normal" selected>Normal</option>
+          <option value="fast">Fast</option>
+        </select>
+      </label>
+      <button id="pause" aria-pressed="false">Pause</button>
+    </div>
 
     <div class="board-wrap">
       <canvas id="board" width="400" height="400" aria-label="Snake game board" role="img"></canvas>
@@ -23,7 +35,15 @@
       </div>
     </div>
 
-    <p class="help">Arrow keys or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to steer · <kbd>Space</kbd> or <kbd>P</kbd> to pause</p>
+    <div class="dpad" aria-label="Direction buttons">
+      <button data-dir="up" aria-label="Up">▲</button>
+      <button data-dir="left" aria-label="Left">◀</button>
+      <button data-dir="right" aria-label="Right">▶</button>
+      <button data-dir="down" aria-label="Down">▼</button>
+    </div>
+
+    <p class="help keys">Arrow keys or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to steer · <kbd>Space</kbd> or <kbd>P</kbd> to pause</p>
+    <p class="help touch">Swipe on the board or use the buttons to steer</p>
   </main>
   <script type="module" src="src/app.js"></script>
 </body>
