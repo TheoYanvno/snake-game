@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Snake</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="bar">
+      <h1>Snake</h1>
+      <div class="scores">
+        <span>Score <strong id="score">0</strong></span>
+      </div>
+    </header>
+
+    <div class="board-wrap">
+      <canvas id="board" width="400" height="400" aria-label="Snake game board" role="img"></canvas>
+      <div id="overlay" class="overlay">
+        <p id="message" class="message">Press <kbd>Space</kbd> to start</p>
+        <button id="start" class="primary">Start</button>
+      </div>
+    </div>
+
+    <p class="help">Arrow keys or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to steer · <kbd>Space</kbd> or <kbd>P</kbd> to pause</p>
+  </main>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
