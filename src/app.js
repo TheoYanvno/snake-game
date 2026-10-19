@@ -8,6 +8,7 @@ const colors = getComputedStyle(document.documentElement);
 const color = (name) => colors.getPropertyValue(name).trim();
 
 let game = createGame({ width: SIZE, height: SIZE });
+const newGame = () => createGame({ width: SIZE, height: SIZE, walls: $('walls').checked });
 let state = 'ready';                    // ready | playing | paused | over
 let timer = null;
 
@@ -17,16 +18,26 @@ const storage = {
   get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
   set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ } },
 };
-const level = () => $('speed').value;
-const bestScores = () => storage.get('snake-best', {});      // one best score per speed level
+// One best score per speed level, kept separately for walls on and off ("normal", "normal-wrap")
+const level = () => $('speed').value + ($('walls').checked ? '' : '-wrap');
+const bestScores = () => storage.get('snake-best', {});
 const showBest = () => { $('best').textContent = bestScores()[level()] ?? 0; };
 
 $('speed').value = storage.get('snake-speed', 'normal');
+$('walls').checked = storage.get('snake-walls', true);
 $('speed').onchange = () => {
-  storage.set('snake-speed', level());
+  storage.set('snake-speed', $('speed').value);
   showBest();
   $('speed').blur();                    // so arrow keys steer instead of changing the speed
 };
+$('walls').onchange = () => {
+  storage.set('snake-walls', $('walls').checked);
+  canvas.classList.toggle('wrap', !$('walls').checked);
+  if (state === 'ready') { game = newGame(); draw(); }
+  showBest();
+  $('walls').blur();
+};
+canvas.classList.toggle('wrap', !$('walls').checked);
 
 // ---- drawing ----
 
@@ -75,21 +86,22 @@ function tick() {
   $('score').textContent = game.score;
   draw();
   if (result === 'crash' || result === 'win') return end(result);
-  timer = setTimeout(tick, tickMs(level(), game.score));
+  timer = setTimeout(tick, tickMs($('speed').value, game.score));
 }
 
 function start() {
   if (state === 'over' || state === 'ready') {
-    game = createGame({ width: SIZE, height: SIZE });
+    game = newGame();
     $('score').textContent = 0;
   }
   state = 'playing';
   $('overlay').hidden = true;
-  $('speed').disabled = true;           // changing speed mid-game would make best scores unfair
+  $('speed').disabled = true;           // changing settings mid-game would make best scores unfair
+  $('walls').disabled = true;
   $('pause').setAttribute('aria-pressed', 'false');
   $('pause').textContent = 'Pause';
   clearTimeout(timer);
-  timer = setTimeout(tick, tickMs(level(), game.score));
+  timer = setTimeout(tick, tickMs($('speed').value, game.score));
 }
 
 function pause() {
@@ -104,6 +116,7 @@ function pause() {
 function end(result) {
   state = 'over';
   $('speed').disabled = false;
+  $('walls').disabled = false;
   $('pause').textContent = 'Pause';
   const best = bestScores();
   const isBest = game.score > (best[level()] ?? 0);

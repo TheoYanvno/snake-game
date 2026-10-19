@@ -112,6 +112,12 @@ select {
   margin-left: 6px;
 }
 
+.check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 1.05em; height: 1.05em; }
+.options .check { margin-left: auto; }
+/* no walls: a dashed edge shows the board wraps around */
+canvas.wrap { outline: 2px dashed #3f6b4f; outline-offset: -2px; }
+
 .new-best { color: #ffd76a; font-weight: 600; }
 
 /* On-screen direction pad, shown on touch screens */

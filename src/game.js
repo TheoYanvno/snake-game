@@ -10,8 +10,11 @@ export const DIRECTIONS = {
 
 const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
 
-/** A new game: a 3-cell snake in the middle of the board heading right, plus one piece of food. */
-export function createGame({ width = 20, height = 20, rand = Math.random } = {}) {
+/**
+ * A new game: a 3-cell snake in the middle of the board heading right, plus one piece of food.
+ * With walls: false the board wraps around, so leaving one edge brings the snake in on the other side.
+ */
+export function createGame({ width = 20, height = 20, rand = Math.random, walls = true } = {}) {
   const cx = Math.floor(width / 2);
   const cy = Math.floor(height / 2);
   const snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
@@ -25,6 +28,7 @@ export function createGame({ width = 20, height = 20, rand = Math.random } = {})
     score: 0,
     over: false,
     won: false,
+    walls,
     rand,
   };
   game.food = placeFood(game);
@@ -59,7 +63,8 @@ export function step(game) {
   if (game.over) return 'crash';
   if (game.queue.length) game.direction = game.queue.shift();
   const d = DIRECTIONS[game.direction];
-  const head = { x: game.snake[0].x + d.x, y: game.snake[0].y + d.y };
+  let head = { x: game.snake[0].x + d.x, y: game.snake[0].y + d.y };
+  if (!game.walls) head = wrap(game, head);
   const eating = game.food && head.x === game.food.x && head.y === game.food.y;
 
   // The tail moves out of the way this step unless the snake is growing, so it doesn't count as a hit.
@@ -92,4 +97,5 @@ export function tickMs(level, score) {
 }
 
 const key = (c) => `${c.x},${c.y}`;
+const wrap = (game, c) => ({ x: (c.x + game.width) % game.width, y: (c.y + game.height) % game.height });
 const outside = (game, c) => c.x < 0 || c.y < 0 || c.x >= game.width || c.y >= game.height;

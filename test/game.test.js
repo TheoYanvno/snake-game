@@ -93,3 +93,21 @@ test('speeds up with level and score, with a floor', () => {
   assert.ok(tickMs('normal', 10) < tickMs('normal', 0));
   assert.equal(tickMs('fast', 1000), 45);
 });
+
+test('with walls off, the snake wraps to the other side instead of crashing', () => {
+  const g = createGame({ width: 6, height: 6, rand: fixed(0), walls: false });
+  g.food = { x: 0, y: 0 };
+  for (let i = 0; i < 3; i++) assert.equal(step(g), 'move');
+  assert.deepEqual(g.snake[0], { x: 0, y: 3 });             // came back in on the left edge
+  turn(g, 'up');
+  for (let i = 0; i < 4; i++) step(g);
+  assert.deepEqual(g.snake[0], { x: 0, y: 5 });             // and wrapped from the top to the bottom
+});
+
+test('with walls off, running into yourself still ends the game', () => {
+  const g = createGame({ width: 10, height: 10, walls: false });
+  g.snake = [{ x: 5, y: 5 }, { x: 4, y: 5 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 }];
+  g.direction = 'down';
+  g.food = { x: 0, y: 0 };
+  assert.equal(step(g), 'crash');
+});
