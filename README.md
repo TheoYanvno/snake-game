@@ -47,3 +47,7 @@ npm test       # 13 tests (Node 18+)
 ```
 
 Built with help from AI coding tools for planning, code review and tests.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
