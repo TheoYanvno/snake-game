@@ -1,4 +1,5 @@
 import { createGame, step, turn, tickMs } from './game.js';
+import { animalFor, nextPair, VERSES, superBook } from './theme.js';
 
 const SIZE = 20;                        // cells per side
 const canvas = document.getElementById('board');
@@ -59,18 +60,59 @@ function draw() {
     for (let x = (y % 2); x < SIZE; x += 2) ctx.fillRect(x * cell, y * cell, cell, cell);
   }
 
+  const emoji = (ch, cx, cy, size) => {
+    ctx.font = `${size}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ch, cx, cy);
+  };
+
+  // the pair waiting to be gathered: two of the next animal
   if (game.food) {
+    const pair = nextPair(game.snake.length);
     ctx.fillStyle = color('--food');
+    ctx.globalAlpha = 0.25;
     ctx.beginPath();
-    ctx.arc((game.food.x + 0.5) * cell, (game.food.y + 0.5) * cell, cell * 0.38, 0, Math.PI * 2);
+    ctx.arc((game.food.x + 0.5) * cell, (game.food.y + 0.5) * cell, cell * 0.5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1;
+    emoji(pair, (game.food.x + 0.3) * cell, (game.food.y + 0.55) * cell, cell * 0.55);
+    emoji(pair, (game.food.x + 0.72) * cell, (game.food.y + 0.45) * cell, cell * 0.55);
   }
 
-  game.snake.forEach((c, i) => {
-    ctx.fillStyle = i === 0 ? color('--head') : color('--snake');
-    const pad = cell * 0.08;
-    roundRect(c.x * cell + pad, c.y * cell + pad, cell - pad * 2, cell - pad * 2, cell * 0.25);
-  });
+  // the line of animals behind the ark, from the tail forward so the ark is drawn on top
+  for (let i = game.snake.length - 1; i >= 1; i--) {
+    const c = game.snake[i];
+    emoji(animalFor(i), (c.x + 0.5) * cell, (c.y + 0.55) * cell, cell * 0.8);
+  }
+  if (game.snake.length) drawArk(game.snake[0], cell);
+}
+
+// The ark: a wooden hull with a little house on top.
+function drawArk(c, cell) {
+  const x = c.x * cell, y = c.y * cell, p = cell * 0.08;
+  ctx.fillStyle = color('--head');
+  ctx.beginPath();
+  ctx.moveTo(x + p, y + cell * 0.52);
+  ctx.lineTo(x + cell - p, y + cell * 0.52);
+  ctx.lineTo(x + cell * 0.8, y + cell - p);
+  ctx.lineTo(x + cell * 0.2, y + cell - p);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = color('--snake');
+  ctx.fillRect(x + cell * 0.28, y + cell * 0.26, cell * 0.44, cell * 0.26);
+  ctx.beginPath();
+  ctx.moveTo(x + cell * 0.22, y + cell * 0.28);
+  ctx.lineTo(x + cell * 0.5, y + p);
+  ctx.lineTo(x + cell * 0.78, y + cell * 0.28);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = color('--panel');
+  ctx.lineWidth = Math.max(1, cell * 0.04);
+  ctx.beginPath();
+  ctx.moveTo(x + cell * 0.18, y + cell * 0.72);
+  ctx.lineTo(x + cell * 0.82, y + cell * 0.72);
+  ctx.stroke();
 }
 
 function roundRect(x, y, w, h, r) {
@@ -110,7 +152,7 @@ function pause() {
   clearTimeout(timer);
   $('pause').setAttribute('aria-pressed', 'true');
   $('pause').textContent = 'Resume';
-  showOverlay('Paused', 'Resume');
+  showOverlay('Paused', 'Resume', VERSES.gathered);
 }
 
 function end(result) {
@@ -121,12 +163,19 @@ function end(result) {
   const best = bestScores();
   const isBest = game.score > (best[level()] ?? 0);
   if (isBest) { best[level()] = game.score; storage.set('snake-best', best); showBest(); }
-  showOverlay(result === 'win' ? `You filled the board! Score ${game.score}` : `Game over · Score ${game.score}`, 'Play again');
+  showOverlay(result === 'win' ? `The ark is full! ${game.score} pairs gathered` : `The flood came · ${game.score} pairs gathered`, 'Play again',
+    result === 'win' ? VERSES.win : VERSES.over);
   if (isBest) $('message').insertAdjacentHTML('beforeend', '<br><span class="new-best">New best score!</span>');
 }
 
-function showOverlay(message, button) {
+function showOverlay(message, button, verse = null) {
   $('message').textContent = message;
+  $('verse').hidden = !verse;
+  if (verse) {
+    $('verse-text').textContent = `“${verse.text}”`;
+    $('verse-ref').textContent = `${verse.ref} (WEB)`;
+    $('verse-link').href = superBook(verse);
+  }
   $('start').textContent = button;
   $('overlay').hidden = false;
   $('start').focus({ preventScroll: true });
@@ -182,4 +231,5 @@ $('pause').onclick = () => (state === 'playing' ? pause() : state === 'paused' &
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 addEventListener('resize', fitCanvas);
 showBest();
+showOverlay('Lead the animals into the ark, two by two', 'Start', VERSES.start);
 fitCanvas();

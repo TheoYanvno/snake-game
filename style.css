@@ -1,13 +1,14 @@
 :root {
-  --bg: #0f1a14;
-  --panel: #16251c;
-  --grid: #1b2d22;
-  --text: #e6f2ea;
-  --muted: #8fb09b;
-  --snake: #5fd38d;
-  --head: #b5f5c9;
-  --food: #ff6b5b;
-  --accent: #5fd38d;
+  /* Noah's ark: grassland under a stormy sky, a wooden ark */
+  --bg: #14273a;
+  --panel: #3f6b35;
+  --grid: #477a3c;
+  --text: #f3f0e6;
+  --muted: #b9c6cf;
+  --snake: #e8d3a4;
+  --head: #8a5a2b;
+  --food: #ffe08a;
+  --accent: #f2b544;
 }
 
 * { box-sizing: border-box; }
@@ -15,7 +16,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #183324, var(--bg) 60%);
+  background: radial-gradient(circle at top, #2c4a66, var(--bg) 60%);
   color: var(--text);
   font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
   display: grid;
@@ -142,3 +143,10 @@ canvas.wrap { outline: 2px dashed #3f6b4f; outline-offset: -2px; }
   .touch { display: block; }
   .keys { display: none; }
 }
+
+.bar h1 .sub { font-size: .55em; font-weight: 500; color: var(--muted); margin-left: 6px; }
+.verse { margin: 4px 16px 12px; max-width: 30em; font-size: .9rem; color: var(--text); text-align: center; }
+.verse p { margin: 0 0 4px; font-style: italic; }
+.verse footer { color: var(--muted); font-size: .8rem; }
+.verse a { color: var(--accent); }
+@media (max-width: 480px) { .bar h1 .sub { display: none; } }

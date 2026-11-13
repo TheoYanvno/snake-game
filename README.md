@@ -1,17 +1,19 @@
-# Snake
+# Two by Two: Snake
 
 **▶ [Play it](https://theoyanvno.github.io/snake-game/)**
 
-The classic Snake game in the browser: eat the food, grow longer, and don't run into the walls or yourself. Works with a keyboard on a computer and with swipes or on-screen buttons on a phone.
+The classic Snake game with a Noah's ark theme: steer the ark, gather the animals two by two, and each pair joins the line behind you. Don't run into the walls or your own line. Works with a keyboard on a computer and with swipes or on-screen buttons on a phone.
 
 **Tech:** vanilla JavaScript (ES modules) · HTML5 Canvas · CSS · `localStorage` · `node:test` · no frameworks or build step
 
 | Desktop | Phone |
 |---|---|
-| ![Snake on a desktop browser](docs/desktop.png) | ![Snake on a phone with the direction pad](docs/phone.png) |
+| ![The ark leading a long line of animals across a grassy board, with a pair of deer waiting to be gathered](docs/desktop.png) | ![The game on a phone with the direction pad](docs/phone.png) |
 
 ## Features
 
+- **Noah's ark theme:** the ark leads the line, starting with a pair of doves; every pair you gather (sheep, cows, elephants, lions, camels and more) joins it, and the score counts pairs
+- **Verses from Genesis 6 to 9** on the start, pause and game-over screens, from the World English Bible (public domain), each linking to its chapter in [SuperBook](https://theoyanvno.github.io/SuperBook/)
 - **Controls:** arrow keys or WASD; on a phone, swipe on the board or use the direction pad
 - **Speed levels:** slow, normal and fast, and the snake speeds up a little every 5 points
 - **No-walls mode:** turn off Walls and the snake wraps around to the other side (the board gets a dashed edge)
@@ -25,8 +27,9 @@ The classic Snake game in the browser: eat the food, grow longer, and don't run 
 | File | What it does |
 |---|---|
 | [`src/game.js`](src/game.js) | The rules, with no browser code: moving, turning, eating, growing, collisions, wrapping, food placement and speed |
-| [`src/app.js`](src/app.js) | Drawing on the canvas, the game loop, keyboard and touch input, pause and best scores |
-| [`test/game.test.js`](test/game.test.js) | 13 tests for the rules |
+| [`src/app.js`](src/app.js) | Drawing on the canvas (the ark, the animals and the waiting pair), the game loop, keyboard and touch input, pause and best scores |
+| [`src/theme.js`](src/theme.js) | The ark theme: which animal is where in the line, the verses and the SuperBook links |
+| [`test/game.test.js`](test/game.test.js), [`test/theme.test.js`](test/theme.test.js) | 15 tests for the rules and the theme |
 
 Keeping the rules separate from the drawing makes them easy to test. A few details the tests cover:
 
